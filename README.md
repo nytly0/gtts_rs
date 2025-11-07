@@ -24,10 +24,16 @@ use gtts_rs::tts::{ GttsClient, Language, Speed };
 
 fn main() -> Result<(), String> {
     let client = GttsClient::default();
-    client.speak("Hello, world!")?;
+    client.speak("Hello world!")?;
     Ok(())
 }
 ```
+
+this will produce an audio:
+<audio controls>
+<source src="./examples/example.mp3" type="audio/mpeg"> Your browser does not
+support the audio element.
+</audio>
 
 with custom configuration:
 

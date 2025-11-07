@@ -141,7 +141,7 @@ impl GttsClient {
     let text = text.as_ref();
     self.save_to_file(text, "audio.mp3")?;
     self.play_mp3("audio.mp3")?;
-    
+
     if let Err(e) = fs::remove_file("./audio.mp3") {
       eprintln!("Warning: failed to delete audio file: {}", e);
     }
