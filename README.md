@@ -1,4 +1,4 @@
-# `gtts_rs`
+# gtts_rs
 
 A Rust library for Google Translate’s text-to-speech API.
 
@@ -10,39 +10,53 @@ A Rust library for Google Translate’s text-to-speech API.
 ```rust
 use gtts_rs::tts::{ GttsClient, Language, Speed };
 
-fn main() {
-    let mut narrator = GttsClient {
-        volume: 1.0,
-        speed: Speed::Normal,
-        language: Language::English,
-        tld: "com",
-    };
-    narrator.speak("Hello, World!").unwrap();
+fn main() -> Result<(), String> {
+    let client = GttsClient::default();
+    client.speak("Hello, world!")?;
+    Ok(())
 }
 ```
 
-### ...Or a more advanced one
+with custom configuration:
 
 ```rust
-use tts_rust::{ tts::GTTSClient, languages::Languages };
+use gtts_rs::tts::{ GttsClient, Language, Speed };
 
-fn main() {
-    let mut narrator: GTTSClient = GTTSClient {
+fn main() -> Result<(), String> {
+    let mut client: GttsClient = GttsClient {
         volume: 1.0,
-        language: Languages::English,
+        language: Language::English,
+        speed: Speed::Slow,
         tld: "com",
     };
-    narrator.speak("Starting test?").unwrap();
-    let ms = std::time::Duration::from_millis(1000);
-    for _x in 1..9 {
-        narrator.volume += 1.0;
-        let to_speak: String = String::from("Loop ") + &narrator.volume.to_string();
-        narrator.speak(&to_speak).unwrap();
-        std::thread::sleep(ms);
-    }
+    client.speak("Hello, world!")?;
+    Ok(())
+}
+```
+
+or a different language:
+
+```rust
+use gtts_rs::tts::{ GttsClient, Language, Speed };
+
+fn main() -> Result<(), String> {
+    let client = GttsClient {
+        volume: 1.0,
+        language: Language::Japanese,
+        speed: Speed::Normal,
+        tld: "co.jp",
+    };  
+    client.speak("こんにちは、元気ですか？")?;
+    Ok(())
 }
 ```
 
 ### License
 
-#### MIT
+This project is licensed under the MIT License. See the LICENSE file for
+details.
+
+### Contribution
+
+Contributions are very welcome! Please feel free to submit issues and pull
+requests.

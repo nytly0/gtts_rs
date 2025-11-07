@@ -37,4 +37,40 @@ mod tests {
       assert_eq!(e, "Invalid TLD: abcd");
     }
   }
+
+  #[test]
+  fn test_complex_text() -> Result<(), String> {
+    let client = GttsClient::new(1.0, Speed::Normal, Language::English, "com");
+    let complex_text = "Hello, world! こんにちは 세계 안녕하세요";
+    client.speak(complex_text)?;
+    Ok(())
+  }
+
+  #[test]
+  fn loop_test() {
+    let mut narrator: GttsClient = GttsClient {
+        volume: 1.0,
+        language: Language::English,
+        speed: Speed::Slow,
+        tld: "com",
+    };
+    narrator.speak("Starting loop").unwrap();
+    let ms = std::time::Duration::from_millis(1000);
+    for x in 1..6 {
+        narrator.volume += 0.3;
+        if x == 3 {
+            narrator.speed = Speed::Normal;
+        }
+        let to_speak: String = String::from("Loop ") + &x.to_string();
+        narrator.speak(&to_speak).unwrap();
+        std::thread::sleep(ms);
+    }
+  }
+
+  #[test]
+  fn japanese_test() -> Result<(), String> {
+    let client = GttsClient::new(1.0, Speed::Normal, Language::Japanese, "co.jp");
+    client.speak("こんにちは、元気ですか？")?;
+    Ok(())
+  }
 }

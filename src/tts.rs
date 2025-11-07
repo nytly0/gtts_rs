@@ -79,7 +79,7 @@ impl GttsClient {
 
   fn check_tld(&self) -> Result<(), String> {
     let valid_tlds = vec![
-      "com", "co.uk", "ca", "com.au", "de", "fr", "it", "es", "nl", "co.in",
+      "com", "co.uk", "ca", "com.au", "de", "fr", "it", "es", "nl", "co.in", "co.jp",
     ];
     if !valid_tlds.contains(&self.tld) {
       return Err(format!("Invalid TLD: {}", self.tld));
@@ -139,8 +139,9 @@ impl GttsClient {
 }
 
   /// Speak the input according to the volume and language
-  pub fn speak(&self, input: &str) -> Result<(), String> {
-    self.save_to_file(input, "audio.mp3")?;
+  pub fn speak<S: AsRef<str>>(&self, text: S) -> Result<(), String> {
+    let text = text.as_ref();
+    self.save_to_file(text, "audio.mp3")?;
     self.play_mp3("audio.mp3")?;
 
     if let Err(e) = fs::remove_file("./audio.mp3") {
