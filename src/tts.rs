@@ -3,7 +3,6 @@ use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
-use std::path::Path;
 
 use crate::constants::GOOGLE_TTS_MAX_CHARS;
 pub use crate::lang::Language;
@@ -64,22 +63,23 @@ impl GttsClient {
     let bytes = rep.as_bytes();
 
     if bytes.is_empty() {
-        return Err("Received empty TTS response".into());
+      return Err("Received empty TTS response".into());
     }
 
     let mut file = File::create(filename)
-        .map_err(|e| format!("Failed to create file '{}': {}", filename, e))?;
+      .map_err(|e| format!("Failed to create file '{}': {}", filename, e))?;
 
-    file.write_all(bytes)
-        .map_err(|e| format!("Failed to write to '{}': {}", filename, e))?;
+    file
+      .write_all(bytes)
+      .map_err(|e| format!("Failed to write to '{}': {}", filename, e))?;
 
     Ok(())
-}
-
+  }
 
   fn check_tld(&self) -> Result<(), String> {
     let valid_tlds = vec![
-      "com", "co.uk", "ca", "com.au", "de", "fr", "it", "es", "nl", "co.in", "co.jp",
+      "com", "co.uk", "ca", "com.au", "de", "fr", "it", "es", "nl", "co.in",
+      "co.jp",
     ];
     if !valid_tlds.contains(&self.tld) {
       return Err(format!("Invalid TLD: {}", self.tld));
@@ -91,7 +91,6 @@ impl GttsClient {
     &self,
     text: &str,
   ) -> Result<minreq::Response, String> {
-
     self.check_tld()?;
     let speed = match self.speed {
       Speed::Normal => "1",
@@ -122,21 +121,20 @@ impl GttsClient {
 
   /// Play the mp3 file at the given path with the specified volume
   fn play_mp3(&self, mp3: &str) -> Result<(), String> {
-    let (_stream, handle) = rodio::OutputStream::try_default()
-        .map_err(|e| e.to_string())?;
-    let sink = rodio::Sink::try_new(&handle)
-        .map_err(|e| e.to_string())?;
+    let (_stream, handle) =
+      rodio::OutputStream::try_default().map_err(|e| e.to_string())?;
+    let sink = rodio::Sink::try_new(&handle).map_err(|e| e.to_string())?;
     sink.set_volume(self.volume);
 
     let file = File::open(mp3).map_err(|e| e.to_string())?;
-    let decoder = rodio::Decoder::new(BufReader::new(file))
-        .map_err(|e| e.to_string())?;
+    let decoder =
+      rodio::Decoder::new(BufReader::new(file)).map_err(|e| e.to_string())?;
 
     sink.append(decoder);
     sink.sleep_until_end();
 
     Ok(())
-}
+  }
 
   /// Speak the input according to the volume and language
   pub fn speak<S: AsRef<str>>(&self, text: S) -> Result<(), String> {
@@ -145,11 +143,11 @@ impl GttsClient {
     self.play_mp3("audio.mp3")?;
 
     if let Err(e) = fs::remove_file("./audio.mp3") {
-        eprintln!("Warning: failed to delete audio file: {}", e);
+      eprintln!("Warning: failed to delete audio file: {}", e);
     }
 
     Ok(())
-}
+  }
 }
 
 impl Default for GttsClient {

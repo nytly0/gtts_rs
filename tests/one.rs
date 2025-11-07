@@ -49,27 +49,28 @@ mod tests {
   #[test]
   fn loop_test() {
     let mut narrator: GttsClient = GttsClient {
-        volume: 1.0,
-        language: Language::English,
-        speed: Speed::Slow,
-        tld: "com",
+      volume: 1.0,
+      language: Language::English,
+      speed: Speed::Slow,
+      tld: "com",
     };
     narrator.speak("Starting loop").unwrap();
     let ms = std::time::Duration::from_millis(1000);
     for x in 1..6 {
-        narrator.volume += 0.3;
-        if x == 3 {
-            narrator.speed = Speed::Normal;
-        }
-        let to_speak: String = String::from("Loop ") + &x.to_string();
-        narrator.speak(&to_speak).unwrap();
-        std::thread::sleep(ms);
+      narrator.volume += 0.3;
+      if x == 3 {
+        narrator.speed = Speed::Normal;
+      }
+      let to_speak: String = String::from("Loop ") + &x.to_string();
+      narrator.speak(&to_speak).unwrap();
+      std::thread::sleep(ms);
     }
   }
 
   #[test]
   fn japanese_test() -> Result<(), String> {
-    let client = GttsClient::new(1.0, Speed::Normal, Language::Japanese, "co.jp");
+    let client =
+      GttsClient::new(1.0, Speed::Normal, Language::Japanese, "co.jp");
     client.speak("こんにちは、元気ですか？")?;
     Ok(())
   }
