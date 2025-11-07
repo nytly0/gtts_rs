@@ -29,7 +29,7 @@ fn main() -> Result<(), String> {
 }
 ```
 
-this will produce an audio: [hello_world](examples/hello_world.mp4)
+this will produce an audio: [hello_world](examples/hello_world.mp3)
 
 with custom configuration:
 
