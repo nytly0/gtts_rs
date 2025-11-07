@@ -17,5 +17,5 @@ rodio = { version = "0.19", default-features = false, features = ["mp3", "sympho
 
 # bin cli
 [[bin]]
-name = "tts"
+name = "rgtts" # Rust gTTS
 path = "cli/main.rs"

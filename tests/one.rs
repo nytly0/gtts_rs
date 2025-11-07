@@ -74,4 +74,11 @@ mod tests {
     client.speak("こんにちは、元気ですか？")?;
     Ok(())
   }
+
+  #[test]
+  fn example_save_to_file() -> Result<(), String> {
+    let client = GttsClient::new(1.0, Speed::Normal, Language::English, "co.uk");
+    client.save_to_file("Hello world!", "example.mp3")?;
+    Ok(())
+  }
 }
