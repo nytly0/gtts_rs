@@ -1,6 +1,6 @@
+use gtts_rs::tts::{GttsClient, Language, Speed};
 use quicli::prelude::*;
 use structopt::StructOpt;
-use gtts_rs::tts::{GttsClient, Speed, Language};
 
 #[derive(Debug, StructOpt)]
 struct GttsCli {

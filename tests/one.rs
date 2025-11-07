@@ -1,6 +1,5 @@
 use gtts_rs::tts::{GttsClient, Language, Speed};
 
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -13,6 +12,6 @@ mod tests {
   }
   fn test_unwrap() {
     let client = GttsClient::new(1.0, Speed::Normal, Language::English, "com");
-    client.speak("This is a test.").unwrap();
+    client.speak("This is a test.");
   }
 }

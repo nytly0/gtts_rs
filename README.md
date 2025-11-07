@@ -1,13 +1,11 @@
-### `gtts_rs`
+# `gtts_rs`
 
-Really Simple Text to Speech module for rust
+A Rust library for Google Translate’s text-to-speech API.
 
 - [crates.io](https://crates.io/crates/gtts_rs)
 - [docs.rs](https://docs.rs/gtts_rs/)
 
-Uses `cargo fmt` as formatter
-
-### Example...
+## Example
 
 ```rust
 use gtts_rs::tts::{ GttsClient, Language, Speed };

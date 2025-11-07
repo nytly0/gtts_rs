@@ -1,19 +1,13 @@
 use minreq::get;
 use std::fs;
 use std::fs::File;
-use std::io::prelude::*;
 use std::io::BufReader;
+use std::io::prelude::*;
 use std::path::Path;
 
 use crate::constants::GOOGLE_TTS_MAX_CHARS;
 pub use crate::lang::Language;
 use crate::url::core::Core;
-
-#[derive(Debug, Clone)]
-pub enum Speed {
-  Normal,
-  Slow,
-}
 
 #[derive(Debug)]
 /// # The Google Text-to-Speech Client
@@ -24,6 +18,7 @@ pub enum Speed {
 /// use gtts_rs::tts::Language;
 /// let narrator = GttsClient::new(1.0, Speed::Normal, Language::English, "com");
 /// narrator.speak("Hello!").unwrap();
+/// ```
 pub struct GttsClient {
   /// Volume level from 0.0 to 1.0 (1.0 is recommended)
   /// Note: This only affects playback volume, not the audio file itself.
@@ -31,18 +26,24 @@ pub struct GttsClient {
   /// Speed of the speech
   pub speed: Speed,
   /// Language for the TTS
-  /// 
+  ///
   /// See `Language` enum for supported languages
   pub language: Language,
-  /// Top-level domain for gTTS 
-  /// 
+  /// Top-level domain for gTTS
+  ///
   /// Examples: "com", "co.uk", "ca", etc.
   pub tld: &'static str,
 }
 
-impl GttsClient {
+#[derive(Debug, Clone)]
+/// Speed options for speech in gTTS
+pub enum Speed {
+  Normal,
+  Slow,
+}
 
-  /// # Creates a new gTTS client instance
+impl GttsClient {
+  /// Creates a new gTTS client instance
   pub fn new(
     volume: f32,
     speed: Speed,
@@ -66,10 +67,7 @@ impl GttsClient {
       return Ok(());
     }
 
-    Err(format!(
-      "Failed to write TTS audio to file: {}",
-      filename
-    ))
+    Err(format!("Failed to write TTS audio to file: {}", filename))
   }
 
   /// Get the TTS response by making a request to the translate.google.{tld}/translate_tts
@@ -89,7 +87,6 @@ impl GttsClient {
       ));
     } else if len == 0 {
       return Err("The text is empty.".to_string());
-        
     }
     let language = Language::as_code(self.language.clone());
     let text = Core::fragmenter(text)?;
@@ -117,15 +114,17 @@ impl GttsClient {
 
   /// Speak the input according to the volume and language
   pub fn speak(&self, input: &str) -> Result<(), String> {
-    self.save_to_file(input, "audio.mp3").expect("Failed to save audio file.");
+    self
+      .save_to_file(input, "audio.mp3")
+      .expect("Failed to save audio file.");
     self.play_mp3("audio.mp3");
 
     if let Err(e) = fs::remove_file("./audio.mp3") {
-        eprintln!("Warning: failed to delete audio file: {}", e);
+      eprintln!("Warning: failed to delete audio file: {}", e);
     }
 
     Ok(())
-}
+  }
 }
 
 impl Default for GttsClient {
