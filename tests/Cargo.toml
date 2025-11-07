@@ -9,9 +9,5 @@ edition = "2021"
 name = "test_one"
 path = "one.rs"
 
-[[bin]]
-name = "test_two"
-path = "two.rs"
-
 [dependencies]
 tts_rust = { path = "../" }

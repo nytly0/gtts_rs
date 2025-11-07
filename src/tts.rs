@@ -6,66 +6,106 @@ use std::io::BufReader;
 use std::path::Path;
 
 use crate::constants::GOOGLE_TTS_MAX_CHARS;
-use crate::languages::Languages;
+pub use crate::lang::Language;
 use crate::url::core::Core;
 
-#[derive(Debug)]
-pub struct GTTSClient {
-  /// The volume of the audio. Must be between 0.0 and 1.0. Default is 1.0.
-  ///
-  /// recommended value is 1.0
-  pub volume: f32,
-  /// The language of the gTTS client (ISO code)
-  ///
-  /// example: Languages::English, Languages::Japanese
-  pub language: Languages,
-  /// top-level domain of the gTTS client
-  ///
-  /// example: "com"
-  pub tld: &'static str,
-}
+#[derive(Debug, Clone)]
 pub enum Speed {
   Normal,
   Slow,
 }
-impl GTTSClient {
-  /// Creates a new gTTS client default values.
-  pub fn default() -> Self {
-    GTTSClient {
-      volume: 1.0,
-      language: Languages::English,
-      tld: "com",
-    }
-  }
-  /// Creates a new gTTS client with the given volume and language.
-  pub fn new(volume: f32, language: Languages, tld: &'static str) -> Self {
-    GTTSClient {
+
+#[derive(Debug)]
+/// # The Google Text-to-Speech Client
+/// ## Example
+/// ```
+/// use gtts_rs::tts::GttsClient;
+/// use gtts_rs::tts::Speed;
+/// use gtts_rs::tts::Language;
+/// let narrator = GttsClient::new(1.0, Speed::Normal, Language::English, "com");
+/// narrator.speak("Hello!").unwrap();
+pub struct GttsClient {
+  /// Volume level from 0.0 to 1.0 (1.0 is recommended)
+  /// Note: This only affects playback volume, not the audio file itself.
+  pub volume: f32,
+  /// Speed of the speech
+  pub speed: Speed,
+  /// Language for the TTS
+  /// 
+  /// See `Language` enum for supported languages
+  pub language: Language,
+  /// Top-level domain for gTTS 
+  /// 
+  /// Examples: "com", "co.uk", "ca", etc.
+  pub tld: &'static str,
+}
+
+impl GttsClient {
+
+  /// # Creates a new gTTS client instance
+  pub fn new(
+    volume: f32,
+    speed: Speed,
+    language: Language,
+    tld: &'static str,
+  ) -> Self {
+    GttsClient {
       volume,
+      speed,
       language,
       tld,
     }
   }
+
+  /// Save the TTS audio to a file
   pub fn save_to_file(&self, text: &str, filename: &str) -> Result<(), String> {
-    let len = text.len();
-    if len > GOOGLE_TTS_MAX_CHARS {
-      return Err(format!(
-        "The text is too long. Max length is {}",
-        GOOGLE_TTS_MAX_CHARS
-      ));
-    }
-    let language = Languages::as_code(self.language.clone());
-    let text = Core::fragmenter(text)?;
-    let rep = get(format!("https://translate.google.{}/translate_tts?ie=UTF-8&q={}&tl={}&total=1&idx=0&textlen={}&tl={}&client=tw-ob", self.tld, text.encoded, language, len, language))
-      .send()
-      .map_err(|e| format!("{}", e))?;
+    let rep = self.get_tts_response(text)?;
     let mut file = File::create(filename).unwrap();
     let bytes = rep.as_bytes();
     if !bytes.is_empty() && file.write_all(bytes).is_ok() {
       return Ok(());
     }
 
-    Err("Something went wrong".to_string())
+    Err(format!(
+      "Failed to write TTS audio to file: {}",
+      filename
+    ))
   }
+
+  /// Get the TTS response by making a request to the translate.google.{tld}/translate_tts
+  pub fn get_tts_response(
+    &self,
+    text: &str,
+  ) -> Result<minreq::Response, String> {
+    let speed = match self.speed {
+      Speed::Normal => "1",
+      Speed::Slow => "0.2",
+    };
+    let len = text.len();
+    if len > GOOGLE_TTS_MAX_CHARS {
+      return Err(format!(
+        "The text is too long. Max length is {}",
+        GOOGLE_TTS_MAX_CHARS
+      ));
+    } else if len == 0 {
+      return Err("The text is empty.".to_string());
+        
+    }
+    let language = Language::as_code(self.language.clone());
+    let text = Core::fragmenter(text)?;
+    let base_url =
+      format!("https://translate.google.{}/translate_tts", self.tld);
+    let query_params = format!(
+      "?ie=UTF-8&q={}&tl={}&total=1&idx=0&textlen={}&tl={}&client=tw-ob&ttsspeed={}",
+      text.encoded, language, len, language, speed
+    );
+    let full_url = format!("{}{}", base_url, query_params);
+
+    let rep = get(full_url).send().map_err(|e| format!("{}", e))?;
+    Ok(rep)
+  }
+
+  /// Play the mp3 file at the given path with the specified volume
   fn play_mp3(&self, mp3: &str) {
     let (_stream, handle) = rodio::OutputStream::try_default().unwrap();
     let sink = rodio::Sink::try_new(&handle).unwrap();
@@ -74,32 +114,34 @@ impl GTTSClient {
     sink.append(rodio::Decoder::new(BufReader::new(file)).unwrap());
     sink.sleep_until_end();
   }
+
   /// Speak the input according to the volume and language
   pub fn speak(&self, input: &str) -> Result<(), String> {
-    self.save_to_file(input, "audio.mp3")?;
+    self.save_to_file(input, "audio.mp3").expect("Failed to save audio file.");
     self.play_mp3("audio.mp3");
-    if Path::new("./audio.mp3").exists() {
-      fs::remove_file("./audio.mp3").unwrap();
+
+    if let Err(e) = fs::remove_file("./audio.mp3") {
+        eprintln!("Warning: failed to delete audio file: {}", e);
     }
+
     Ok(())
-  }
-  /// Speak and println! the input according to the volume and language
-  pub fn display_and_speak(&self, input: &str) {
-    self.speak(input).unwrap();
-    println!("{}", input);
-  }
-  /// Fastest way to check if gTTS API works
-  pub fn test(&self) {
-    self.display_and_speak("Hello!");
+}
+}
+
+impl Default for GttsClient {
+  /// Creates a default gTTS client with volume 1.0, normal speed, English language, and "com" TLD.
+  fn default() -> Self {
+    Self::new(1.0, Speed::Normal, Language::English, "com")
   }
 }
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_1() {
-    let narrator = GTTSClient::default();
-    narrator.test();
+impl Clone for GttsClient {
+  /// Clones the gTTS client instance
+  fn clone(&self) -> Self {
+    GttsClient {
+      volume: self.volume,
+      speed: self.speed.clone(),
+      language: self.language.clone(),
+      tld: self.tld,
+    }
   }
 }

@@ -1,13 +1,18 @@
-use tts_rust::tts::GTTSClient;
+use gtts_rs::tts::{GttsClient, Language, Speed};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let narrator = GTTSClient {
-    volume: 1.0,
-    language: tts_rust::languages::Languages::English,
-    tld: "com",
-  };
-  let result = narrator.speak("Hello!").unwrap();
 
-  println!("{:?}", result);
-  Ok(())
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_speak() {
+    let client = GttsClient::default();
+    let result = client.speak("Hello, World!");
+    assert!(result.is_ok());
+  }
+  fn test_unwrap() {
+    let client = GttsClient::new(1.0, Speed::Normal, Language::English, "com");
+    client.speak("This is a test.").unwrap();
+  }
 }

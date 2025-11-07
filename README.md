@@ -1,21 +1,22 @@
-### `tts_rust`
+### `gtts_rs`
 
 Really Simple Text to Speech module for rust
 
-- [crates.io](https://crates.io/crates/tts_rust)
-- [docs.rs](https://docs.rs/tts_rust/)
+- [crates.io](https://crates.io/crates/gtts_rs)
+- [docs.rs](https://docs.rs/gtts_rs/)
 
 Uses `cargo fmt` as formatter
 
 ### Example...
 
 ```rust
-use tts_rust::{ tts::GTTSClient, languages::Languages };
+use gtts_rs::tts::{ GttsClient, Language, Speed };
 
 fn main() {
-    let mut narrator: GTTSClient = GTTSClient {
-        volume: 1.0, 
-        language: Languages::English, // use the Languages enum
+    let mut narrator = GttsClient {
+        volume: 1.0,
+        speed: Speed::Normal,
+        language: Language::English,
         tld: "com",
     };
     narrator.speak("Hello, World!").unwrap();

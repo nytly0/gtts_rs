@@ -1,19 +1,19 @@
 [package]
-name = "tts_rust"
-version = "0.3.5"
-edition = "2021"
-description = "Simple & easy text-to-speech module for your needs."
+name = "gtts_rs"
+version = "0.1.0"
+edition = "2024"
+description = "A Rust library and CLI for Google Translate's text-to-speech API."
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/dhairy-online/tts_rust"
+repository = "https://github.com/dhairy-online/gtts_rs"
 keywords = ["tts", "text_to_speech", "gTTS"]
 
 [dependencies]
-minreq = { version="2.0.3", features=["https"] }
-percent-encoding = "2.1.0"
-rodio = "0.14.0"
 structopt = "0.3"
-quicli = "0.4.0"
+quicli = "0.4"
+minreq = { version = "2.1", features = ["https"]}
+percent-encoding = "2.3.1"
+rodio = { version = "0.19", default-features = false, features = ["mp3", "symphonia-mp3"] }
 
 # bin cli
 [[bin]]
