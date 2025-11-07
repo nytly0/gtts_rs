@@ -29,11 +29,7 @@ fn main() -> Result<(), String> {
 }
 ```
 
-this will produce an audio:
-<audio controls>
-<source src="./examples/example.mp3" type="audio/mpeg"> Your browser does not
-support the audio element.
-</audio>
+this will produce an audio: [hello_world](examples/hello_world.mp4)
 
 with custom configuration:
 
