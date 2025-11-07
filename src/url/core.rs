@@ -1,6 +1,6 @@
-use percent_encoding::utf8_percent_encode;
 use percent_encoding::AsciiSet;
 use percent_encoding::CONTROLS;
+use percent_encoding::utf8_percent_encode;
 
 pub struct Core;
 

@@ -1,14 +1,17 @@
-//! # Very Simple Module for gTTS
-//! Example:
+//! gtts_rs: A Rust library for Google Translate's text-to-speech API.
 //!
+//! # Examples
+//!
+//! ```rust
+//! use gtts_rs::tts::GttsClient;
+//!
+//! fn main() {
+//!     let tts = GttsClient::default();
+//!     tts.speak("Hello, world!").unwrap();
+//! }
+//! ```
 mod constants;
-/// ```
-/// use tts_rust::languages::Languages;
-/// use tts_rust::tts::GTTSClient;
-///
-/// let narrator = GTTSClient::new(1.0, Languages::English, "com");
-/// narrator.speak("Hello!").unwrap();
-/// ```
-pub mod languages;
+
+pub mod lang;
 pub mod tts;
 pub mod url;

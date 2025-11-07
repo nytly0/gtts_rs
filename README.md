@@ -1,49 +1,74 @@
-### `tts_rust`
+# gtts_rs
 
-Really Simple Text to Speech module for rust
+A Rust library for Google Translate’s text-to-speech API. Writes audio to an mp3
+file and plays it using the rodio crate.
 
-- [crates.io](https://crates.io/crates/tts_rust)
-- [docs.rs](https://docs.rs/tts_rust/)
+- [crates.io](https://crates.io/crates/gtts_rs)
+- [docs.rs](https://docs.rs/gtts_rs/)
 
-Uses `cargo fmt` as formatter
+## Usage
 
-### Example...
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+gtts_rs = "0.1"
+```
+
+## Example
+
+using default configuration:
 
 ```rust
-use tts_rust::{ tts::GTTSClient, languages::Languages };
+use gtts_rs::tts::{ GttsClient, Language, Speed };
 
-fn main() {
-    let mut narrator: GTTSClient = GTTSClient {
-        volume: 1.0, 
-        language: Languages::English, // use the Languages enum
-        tld: "com",
-    };
-    narrator.speak("Hello, World!").unwrap();
+fn main() -> Result<(), String> {
+    let client = GttsClient::default();
+    client.speak("Hello, world!")?;
+    Ok(())
 }
 ```
 
-### ...Or a more advanced one
+with custom configuration:
 
 ```rust
-use tts_rust::{ tts::GTTSClient, languages::Languages };
+use gtts_rs::tts::{ GttsClient, Language, Speed };
 
-fn main() {
-    let mut narrator: GTTSClient = GTTSClient {
+fn main() -> Result<(), String> {
+    let mut client: GttsClient = GttsClient {
         volume: 1.0,
-        language: Languages::English,
+        language: Language::English,
+        speed: Speed::Slow,
         tld: "com",
     };
-    narrator.speak("Starting test?").unwrap();
-    let ms = std::time::Duration::from_millis(1000);
-    for _x in 1..9 {
-        narrator.volume += 1.0;
-        let to_speak: String = String::from("Loop ") + &narrator.volume.to_string();
-        narrator.speak(&to_speak).unwrap();
-        std::thread::sleep(ms);
-    }
+    client.speak("Hello, world!")?;
+    Ok(())
 }
 ```
 
-### License
+or a different language:
 
-#### MIT
+```rust
+use gtts_rs::tts::{ GttsClient, Language, Speed };
+
+fn main() -> Result<(), String> {
+    let client = GttsClient {
+        volume: 1.0,
+        language: Language::Japanese,
+        speed: Speed::Normal,
+        tld: "co.jp",
+    };  
+    client.speak("こんにちは、元気ですか？")?;
+    Ok(())
+}
+```
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for
+details.
+
+## Contribution
+
+Contributions are very welcome! Please feel free to submit issues and pull
+requests.
