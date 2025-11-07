@@ -1,11 +1,23 @@
 # gtts_rs
 
-A Rust library for Google Translate’s text-to-speech API.
+A Rust library for Google Translate’s text-to-speech API. Writes audio to an mp3
+file and plays it using the rodio crate.
 
 - [crates.io](https://crates.io/crates/gtts_rs)
 - [docs.rs](https://docs.rs/gtts_rs/)
 
+## Usage
+
+Add this to your `Cargo.toml`:
+
+```toml
+[dependencies]
+gtts_rs = "0.1"
+```
+
 ## Example
+
+using default configuration:
 
 ```rust
 use gtts_rs::tts::{ GttsClient, Language, Speed };
@@ -51,12 +63,12 @@ fn main() -> Result<(), String> {
 }
 ```
 
-### License
+## License
 
 This project is licensed under the MIT License. See the LICENSE file for
 details.
 
-### Contribution
+## Contribution
 
 Contributions are very welcome! Please feel free to submit issues and pull
 requests.
