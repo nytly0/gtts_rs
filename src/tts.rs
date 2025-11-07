@@ -61,20 +61,38 @@ impl GttsClient {
   /// Save the TTS audio to a file
   pub fn save_to_file(&self, text: &str, filename: &str) -> Result<(), String> {
     let rep = self.get_tts_response(text)?;
-    let mut file = File::create(filename).unwrap();
     let bytes = rep.as_bytes();
-    if !bytes.is_empty() && file.write_all(bytes).is_ok() {
-      return Ok(());
+
+    if bytes.is_empty() {
+        return Err("Received empty TTS response".into());
     }
 
-    Err(format!("Failed to write TTS audio to file: {}", filename))
-  }
+    let mut file = File::create(filename)
+        .map_err(|e| format!("Failed to create file '{}': {}", filename, e))?;
 
+    file.write_all(bytes)
+        .map_err(|e| format!("Failed to write to '{}': {}", filename, e))?;
+
+    Ok(())
+}
+
+
+  fn check_tld(&self) -> Result<(), String> {
+    let valid_tlds = vec![
+      "com", "co.uk", "ca", "com.au", "de", "fr", "it", "es", "nl", "co.in",
+    ];
+    if !valid_tlds.contains(&self.tld) {
+      return Err(format!("Invalid TLD: {}", self.tld));
+    }
+    Ok(())
+  }
   /// Get the TTS response by making a request to the translate.google.{tld}/translate_tts
   pub fn get_tts_response(
     &self,
     text: &str,
   ) -> Result<minreq::Response, String> {
+
+    self.check_tld()?;
     let speed = match self.speed {
       Speed::Normal => "1",
       Speed::Slow => "0.2",
@@ -103,28 +121,34 @@ impl GttsClient {
   }
 
   /// Play the mp3 file at the given path with the specified volume
-  fn play_mp3(&self, mp3: &str) {
-    let (_stream, handle) = rodio::OutputStream::try_default().unwrap();
-    let sink = rodio::Sink::try_new(&handle).unwrap();
+  fn play_mp3(&self, mp3: &str) -> Result<(), String> {
+    let (_stream, handle) = rodio::OutputStream::try_default()
+        .map_err(|e| e.to_string())?;
+    let sink = rodio::Sink::try_new(&handle)
+        .map_err(|e| e.to_string())?;
     sink.set_volume(self.volume);
-    let file = std::fs::File::open(mp3).unwrap();
-    sink.append(rodio::Decoder::new(BufReader::new(file)).unwrap());
+
+    let file = File::open(mp3).map_err(|e| e.to_string())?;
+    let decoder = rodio::Decoder::new(BufReader::new(file))
+        .map_err(|e| e.to_string())?;
+
+    sink.append(decoder);
     sink.sleep_until_end();
-  }
+
+    Ok(())
+}
 
   /// Speak the input according to the volume and language
   pub fn speak(&self, input: &str) -> Result<(), String> {
-    self
-      .save_to_file(input, "audio.mp3")
-      .expect("Failed to save audio file.");
-    self.play_mp3("audio.mp3");
+    self.save_to_file(input, "audio.mp3")?;
+    self.play_mp3("audio.mp3")?;
 
     if let Err(e) = fs::remove_file("./audio.mp3") {
-      eprintln!("Warning: failed to delete audio file: {}", e);
+        eprintln!("Warning: failed to delete audio file: {}", e);
     }
 
     Ok(())
-  }
+}
 }
 
 impl Default for GttsClient {

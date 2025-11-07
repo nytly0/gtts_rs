@@ -1,4 +1,4 @@
-//! gtts_rs: A simple and easy text-to-speech module for your needs using
+//! gtts_rs: A Rust library for Google Translate's text-to-speech API.
 //!
 //! # Examples
 //!
